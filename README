@@ -1,3 +1,16 @@
+Added features:
+- Alpha patch                   float alpha in config.h to determine transparency
+- Scrollback patch              
+    - Shift + Mouse wheel       goes through terminal history
+    - Ctrl  + Shift + j/k       goes through terminal history
+
+
+For alpha patch to work the xcompmgr or sth similar needs to be running in the background.
+
+
+Original README:
+
+
 st - simple terminal
 --------------------
 st is a simple terminal emulator for X which sucks less.
