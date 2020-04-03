@@ -3,6 +3,7 @@ Added features:
 - Scrollback patch              
     - Shift + Mouse wheel       goes through terminal history
     - Ctrl  + Shift + j/k       goes through terminal history
+- Anysize patch                 terminal windows fill entire given space
 
 
 For alpha patch to work the xcompmgr or sth similar needs to be running in the background.
