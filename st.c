@@ -2671,3 +2671,33 @@ redraw(void)
 	tfulldirt();
 	draw();
 }
+
+
+void
+cloneterm(const Arg * arg)
+{
+    FILE *pfile;
+    extern FILE *popen();
+    char shell_pid_buff[10] = { 0 };
+    long int shell_pid = -1;
+
+    char pgrep_command[30] = { 0 };
+    snprintf(&pgrep_command[0], sizeof(pgrep_command), "pgrep -P %d", pid);
+    if ((pfile = popen(&pgrep_command[0], "r")))
+    {
+        if (fgets(&shell_pid_buff[0], sizeof(shell_pid_buff), pfile) != NULL )
+        {
+            shell_pid = strtol(&shell_pid_buff[0], NULL, 10);
+        }
+    }
+
+    pclose(pfile);
+    pid_t dwm_pid = getppid();
+
+    union sigval sv;
+    sv.sival_int = (int)shell_pid;
+
+    sigqueue(dwm_pid, SIGUSR1, sv);
+
+}
+

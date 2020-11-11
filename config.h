@@ -195,6 +195,7 @@ static Shortcut shortcuts[] = {
 	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
 	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
 	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
+	{ TERMMOD,              XK_W,           cloneterm,      {.i =  0} },
 	{ TERMMOD,              XK_KP_Prior,    zoom,           {.f = +1} },
 	{ TERMMOD,              XK_KP_Next,     zoom,           {.f = -1} },
 	{ TERMMOD,              XK_KP_Home,     zoomreset,      {.f =  0} },
