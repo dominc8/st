@@ -5,6 +5,7 @@ Added features:
     - Ctrl  + Shift + j/k       goes through terminal history
 - Anysize patch                 terminal windows fill entire given space
 - Send signal to dwm with info necessary to spawn st with working dir being current pwd of shell
+- Ligatures support
 
 
 For alpha patch to work the xcompmgr or sth similar needs to be running in the background.
