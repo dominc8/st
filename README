@@ -6,6 +6,7 @@ Added features:
 - Anysize patch                 terminal windows fill entire given space
 - Send signal to dwm with info necessary to spawn st with working dir being current pwd of shell
 - Ligatures support
+- xtheme patch
 
 
 For alpha patch to work the xcompmgr or sth similar needs to be running in the background.
