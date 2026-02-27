@@ -256,7 +256,7 @@ static char *opt_line  = NULL;
 static char *opt_name  = NULL;
 static char *opt_title = NULL;
 static char *opt_dir   = NULL;
- 
+
 
 static uint buttons; /* bit field of pressed buttons */
 
@@ -834,7 +834,7 @@ xloadcols(void)
 int
 xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b)
 {
-    if (!BETWEEN(x, 0, dc.collen))
+    if (!BETWEEN(x, 0, dc.collen - 1))
         return 1;
 
     *r = dc.col[x].color.red >> 8;
@@ -849,7 +849,7 @@ xsetcolorname(int x, const char *name)
 {
     Color ncolor;
 
-    if (!BETWEEN(x, 0, dc.collen))
+    if (!BETWEEN(x, 0, dc.collen - 1))
         return 1;
 
     if (!xloadcolor(x, name, &ncolor))
@@ -1150,7 +1150,7 @@ xinit(int cols, int rows)
 {
     XGCValues gcvalues;
     Cursor cursor;
-    Window parent;
+    Window parent, root;
     pid_t thispid = getpid();
     XColor xmousefg, xmousebg;
     XWindowAttributes attr;
@@ -1199,15 +1199,20 @@ xinit(int cols, int rows)
         | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
     xw.attrs.colormap = xw.cmap;
 
-    xw.win = XCreateWindow(xw.dpy, parent, xw.l, xw.t,
+    root = XRootWindow(xw.dpy, xw.scr);
+    if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0))))
+        parent = root;
+    xw.win = XCreateWindow(xw.dpy, root, xw.l, xw.t,
             win.w, win.h, 0, xw.depth, InputOutput,
             xw.vis, CWBackPixel | CWBorderPixel | CWBitGravity
             | CWEventMask | CWColormap, &xw.attrs);
+    if (parent != root)
+        XReparentWindow(xw.dpy, xw.win, parent, xw.l, xw.t);
 
     memset(&gcvalues, 0, sizeof(gcvalues));
     gcvalues.graphics_exposures = False;
     xw.buf = XCreatePixmap(xw.dpy, xw.win, win.w, win.h, xw.depth);
-    dc.gc = XCreateGC(xw.dpy, xw.buf, GCGraphicsExposures, &gcvalues);
+    dc.gc = XCreateGC(xw.dpy, xw.win, GCGraphicsExposures, &gcvalues);
     XSetForeground(xw.dpy, dc.gc, dc.col[defaultbg].pixel);
     XFillRectangle(xw.dpy, xw.buf, dc.gc, 0, 0, win.w, win.h);
 
@@ -1650,6 +1655,9 @@ xseticontitle(char *p)
     XTextProperty prop;
     DEFAULT(p, opt_title);
 
+    if (p[0] == '\0')
+        p = opt_title;
+
     if (Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle,
                                     &prop) != Success)
         return;
@@ -1663,6 +1671,9 @@ xsettitle(char *p)
 {
     XTextProperty prop;
     DEFAULT(p, opt_title);
+
+    if (p[0] == '\0')
+        p = opt_title;
 
     if (Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle,
                                     &prop) != Success)
@@ -1866,7 +1877,7 @@ void
 kpress(XEvent *ev)
 {
     XKeyEvent *e = &ev->xkey;
-    KeySym ksym;
+    KeySym ksym = NoSymbol;
     char buf[64], *customkey;
     int len;
     Rune c;
@@ -1876,10 +1887,13 @@ kpress(XEvent *ev)
     if (IS_SET(MODE_KBDLOCK))
         return;
 
-    if (xw.ime.xic)
+    if (xw.ime.xic) {
         len = XmbLookupString(xw.ime.xic, e, buf, sizeof buf, &ksym, &status);
-    else
+        if (status == XBufferOverflow)
+            return;
+    } else {
         len = XLookupString(e, buf, sizeof buf, &ksym, NULL);
+    }
     /* 1. shortcuts */
     for (bp = shortcuts; bp < shortcuts + LEN(shortcuts); bp++) {
         if (ksym == bp->keysym && match(bp->mod, e->state)) {
